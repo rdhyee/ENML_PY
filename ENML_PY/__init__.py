@@ -9,6 +9,16 @@ MIME_TO_EXTESION_MAPPING = {
     'image/gif': '.gif'
 }
 
+def hex_decode(s):
+    # http://stackoverflow.com/a/10619257/7782
+
+    try:
+        import binascii
+        return binascii.unhexlify(s)
+    except:
+        return s.decode('hex')
+
+
 def ENMLToHTML(content, pretty=True, header=True, **kwargs):
     """
     converts ENML string into HTML string
@@ -76,7 +86,8 @@ class MediaStore(object):
         """
         get resource by its hash
         """
-        hash_bin = hash_str.decode('hex')
+        #hash_bin = hash_str.decode('hex')
+        hash_bin = hex_decode(hash_str)
         resource = self.note_store.getResourceByHash(self.note_guid, hash_bin, True, False, False);
         return resource.data.body
 
@@ -101,7 +112,7 @@ class FileMediaStore(MediaStore):
             os.makedirs(self.path)
         data = self._get_resource_by_hash(hash_str)
         file_path = self.path + '/'  + hash_str + MIME_TO_EXTESION_MAPPING[mime_type]
-        f = open(file_path, "w")
+        f = open(file_path, "wb")
         f.write(data)
         f.close()
         return "file://" + file_path
